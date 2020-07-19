@@ -1,0 +1,60 @@
+--goal to create an 'average cost per instance hour' calculation
+--inclusive of savings plans, reservations, etc.
+--per instance family, region, month, year
+
+--notes
+--if 'pricing_term' is 'reserved' - use the unit rate in 'reservation_effective_cost'
+--if 'pricing term' is 'ondemand' AND 'savings_plan_savings_plan_effective_cost' is 0 then use 'line_item_unblended_rate'
+--if 'pricing term' is 'ondemand' AND 'savings_plan_savings_plan_effective_cost' is >0 then use 'savings_plan_savings_plan_effective_cost'
+
+
+--get average cost per instance hour
+WITH demote_regan_01 AS
+  (
+
+SELECT
+year
+, month
+, product_region
+--, product_product_name
+--, line_item_line_item_type
+--, product_instance_type
+, product_instance_type_family
+--, line_item_normalized_usage_amount
+--, line_item_unblended_cost
+--, savings_plan_savings_plan_effective_cost
+, SUM(CASE
+    WHEN LOWER(line_item_line_item_type) = 'discountedusage' THEN CAST(reservation_effective_cost AS DECIMAL(20,5)
+    WHEN LOWER(line_item_line_item_type) = 'savingsplancoveredusage' THEN CAST(savings_plan_savings_plan_effective_cost AS DECIMAL(20,5))
+    ELSE CAST(line_item_unblended_rate AS DECIMAL(20,5))
+    END) AS regan_ec2_cost
+, SUM(line_item_normalized_usage_amount) AS regan_noramlized_usage    
+, SUM(CASE
+    WHEN LOWER(line_item_line_item_type) = 'discountedusage' THEN CAST(reservation_effective_cost AS DECIMAL(20,5)
+    WHEN LOWER(line_item_line_item_type) = 'savingsplancoveredusage' THEN CAST(savings_plan_savings_plan_effective_cost AS DECIMAL(20,5))
+    ELSE CAST(line_item_unblended_rate AS DECIMAL(20,5))
+    END) /
+    SUM(line_item_normalized_usage_amount) AS regan_avg_ec2_cost
+
+
+FROM demote_regan_ingest
+
+WHERE
+LOWER(product_operation) = 'runinstances'
+AND LOWER(product_product_name) = 'amazon elastic compute cloud'
+
+GROUP BY year, month, product_region, product_instance_type_family
+  )
+
+SELECT
+year
+, month
+, product_region
+, product_instance_type_family
+, demote_cost
+, line_item_normalized_usage_amount
+, (demote_cost / line_item_normalized_usage_amount) AS regan_average_cost
+
+FROM demote_regan_01
+
+GROUP BY year, month, product_region, product_instance_type_family

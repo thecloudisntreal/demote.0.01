@@ -1,0 +1,161 @@
+--demote sql file for aws cost and usage report analysis
+--all columns for variable definition and the following analysis
+--july 2020
+
+--define customer table
+WITH demote_regan__01 AS
+(
+
+--select all columns
+SELECT *
+
+--from the current version of the cost and usage report
+FROM c&ureport
+
+--variable assignments and data types for all standard columns
+WHERE
+identity_line_item_id
+, identity_time_interval
+, bill_invoice_id
+, bill_billing_entity
+, bill_bill_type
+, bill_payer_account_id
+, bill_billing_period_start_date
+, bill_billing_period_end_date
+, line_item_usage_account_id
+, line_item_line_item_type
+, line_item_usage_start_date
+, line_item_usage_end_date
+, line_item_product_code
+, line_item_usage_type
+, line_item_operation
+, line_item_availability_zone
+, line_item_resource_id
+, line_item_usage_amount
+, line_item_normalization_factor
+, line_item_normalized_usage_amount
+, line_item_currency_code
+, line_item_unblended_rate
+, line_item_unblended_cost
+, line_item_blended_rate
+, line_item_blended_cost
+, line_item_line_item_description
+, line_item_tax_type
+, line_item_legal_entity
+, product_product_name
+, product_alarm_type
+, product_availability
+, product_capacitystatus
+, product_clock_speed
+, product_current_generation
+, product_database_engine
+, product_deployment_option
+, product_durability
+, product_ecu
+, product_edition
+, product_engine_code
+, product_from_location
+, product_from_location_type
+, product_group
+, product_group_description
+, product_instance_family
+, product_instance_type
+, product_instance_type_family
+, product_license_model
+, product_location
+, product_location_type
+, product_max_iops_burst_performance
+, product_max_iopsvolume
+, product_max_throughputvolume
+, product_max_volume_size
+, product_memory
+, product_min_volume_size
+, product_network_performance
+, product_normalization_size_factor
+, product_operating_system
+, product_operation
+, product_physical_processor
+, product_pre_installed_sw
+, product_processor_architecture
+, product_processor_features
+, product_product_family
+, product_region
+, product_servicecode
+, product_servicename
+, product_sku
+, product_storage
+, product_storage_class
+, product_storage_media
+, product_subscription_type
+, product_tenancy
+, product_to_location
+, product_to_location_type
+, product_transfer_type
+, product_usagetype
+, product_vcpu
+, product_version
+, product_volume_type
+, pricing_rate_id
+, pricing_public_on_demand_cost
+, pricing_public_on_demand_rate
+, pricing_term
+, pricing_unit
+, reservation_amortized_upfront_cost_for_usage
+, reservation_amortized_upfront_fee_for_billing_period
+, reservation_effective_cost
+, reservation_end_time
+, reservation_modification_status
+, reservation_normalized_units_per_reservation
+, reservation_recurring_fee_for_usage
+, reservation_start_time
+, reservation_subscription_id
+, reservation_total_reserved_normalized_units
+, reservation_total_reserved_units
+, reservation_units_per_reservation
+, reservation_unused_amortized_upfront_fee_for_billing_period
+, reservation_unused_normalized_unit_quantity
+, reservation_unused_quantity
+, reservation_unused_recurring_fee
+, reservation_upfront_value
+, resource_tags_aws_cloudformation_logical_id
+, resource_tags_aws_cloudformation_stack_id
+, resource_tags_aws_cloudformation_stack_name
+, resource_tags_user_demote
+, resource_tags_user_finance
+, resource_tags_user_regantechnologies
+, product_gpu
+, product_volume_api_name
+, savings_plan_total_commitment_to_date
+, savings_plan_savings_plan_a_r_n
+, savings_plan_savings_plan_rate
+, savings_plan_used_commitment
+, savings_plan_savings_plan_effective_cost
+, savings_plan_amortized_upfront_commitment_for_billing_period
+, savings_plan_recurring_commitment_for_billing_period
+, product_enhanced_networking_supported
+, product_intel_avx2_available
+, product_intel_avx_available
+, product_intel_turbo_available
+, product_description
+, product_free_query_types
+, product_counts_against_quota
+, product_data_transfer_quota
+, product_free_overage
+, product_overage_type
+, product_routing_target
+, product_routing_type
+, pricing_currency
+, reservation_number_of_reservations
+, year
+, month
+
+
+
+
+
+
+
+
+
+
+)

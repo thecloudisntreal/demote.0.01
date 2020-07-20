@@ -3,13 +3,16 @@
 --per instance family, region, month, year
 
 --notes
---if 'pricing_term' is 'reserved' - use the unit rate in 'reservation_effective_cost'
---if 'pricing term' is 'ondemand' AND 'savings_plan_savings_plan_effective_cost' is 0 then use 'line_item_unblended_rate'
---if 'pricing term' is 'ondemand' AND 'savings_plan_savings_plan_effective_cost' is >0 then use 'savings_plan_savings_plan_effective_cost'
+--if 'pricing_term' is 'reserved' - use the unit rate in
+  --'reservation_effective_cost'
+--if 'pricing term' is 'ondemand' AND 'savings_plan_savings_plan_effective_cost'
+  --is 0 then use 'line_item_unblended_rate'
+--if 'pricing term' is 'ondemand' AND 'savings_plan_savings_plan_effective_cost'
+  --is >0 then use 'savings_plan_savings_plan_effective_cost'
 
 
 --get average cost per instance hour
-WITH demote_regan_01 AS
+WITH demote_regan_02 AS
   (
 
 SELECT
@@ -24,37 +27,55 @@ year
 --, line_item_unblended_cost
 --, savings_plan_savings_plan_effective_cost
 , SUM(CASE
-    WHEN LOWER(line_item_line_item_type) = 'discountedusage' THEN CAST(reservation_effective_cost AS DECIMAL(20,5)
-    WHEN LOWER(line_item_line_item_type) = 'savingsplancoveredusage' THEN CAST(savings_plan_savings_plan_effective_cost AS DECIMAL(20,5))
+    WHEN LOWER(line_item_line_item_type) = 'discountedusage'
+      THEN CAST(reservation_effective_cost AS DECIMAL(20,5)
+    WHEN LOWER(line_item_line_item_type) = 'savingsplancoveredusage'
+      THEN CAST(savings_plan_savings_plan_effective_cost AS DECIMAL(20,5))
     ELSE CAST(line_item_unblended_rate AS DECIMAL(20,5))
     END) AS regan_ec2_cost
-, SUM(line_item_normalized_usage_amount) AS regan_noramlized_usage    
+, SUM(line_item_normalized_usage_amount) AS regan_noramlized_usage
 , SUM(CASE
-    WHEN LOWER(line_item_line_item_type) = 'discountedusage' THEN CAST(reservation_effective_cost AS DECIMAL(20,5)
-    WHEN LOWER(line_item_line_item_type) = 'savingsplancoveredusage' THEN CAST(savings_plan_savings_plan_effective_cost AS DECIMAL(20,5))
+    WHEN LOWER(line_item_line_item_type) = 'discountedusage'
+      THEN CAST(reservation_effective_cost AS DECIMAL(20,5)
+    WHEN LOWER(line_item_line_item_type) = 'savingsplancoveredusage'
+      THEN CAST(savings_plan_savings_plan_effective_cost AS DECIMAL(20,5))
     ELSE CAST(line_item_unblended_rate AS DECIMAL(20,5))
     END) /
     SUM(line_item_normalized_usage_amount) AS regan_avg_ec2_cost
 
-
-FROM demote_regan_ingest
+FROM demote_regan_01
 
 WHERE
 LOWER(product_operation) = 'runinstances'
 AND LOWER(product_product_name) = 'amazon elastic compute cloud'
 
 GROUP BY year, month, product_region, product_instance_type_family
+
   )
 
+, demote_regan_03 AS
+(
+
 SELECT
-year
-, month
-, product_region
-, product_instance_type_family
-, demote_cost
-, line_item_normalized_usage_amount
-, (demote_cost / line_item_normalized_usage_amount) AS regan_average_cost
+demote_regan_01.*
+, demote_regan_02.regan_avg_ec2_cost
 
-FROM demote_regan_01
+FROM demote_regan_02
 
-GROUP BY year, month, product_region, product_instance_type_family
+RIGHT JOIN demote_regan_01 ON
+  demote_regan_01.year = demote_regan_02.year AND
+  demote_regan_01.month = demote_regan_02.month AND
+  demote_regan_01.product_region = demote_regan_02.product_region AND
+  demote_regan_01.product_instance_type_family =
+    demote_regan_02.product_instance_type_family
+  )
+
+SELECT *
+, CASE
+  WHEN LOWER(product_operation) = 'runinstances'
+    AND LOWER(product_product_family) = 'amazon elastic compute cloud'
+    THEN line_item_normalized_usage_amount * regan_avg_ec2_cost
+  ELSE line_item_unblended_cost
+  END AS demote_regan_cost
+
+FROM demote_regan_03

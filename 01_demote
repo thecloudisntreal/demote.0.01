@@ -3,7 +3,7 @@
 --july 2020
 
 --define customer table
-WITH demote_regan__01 AS
+WITH demote_regan_ingest AS
 (
 
 --select all columns
@@ -149,13 +149,7 @@ identity_line_item_id
 , year
 , month
 
-
-
-
-
-
-
-
+FROM demote_customer_ingest
 
 
 )
